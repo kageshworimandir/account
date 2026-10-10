@@ -2659,7 +2659,7 @@ function publicSettingsDialog() {
   editorSelection = null;
   const s = publicAdminData.Settings;
   const body = '<div class="form-grid">' + ['Name', 'Address', 'Phone', 'Email', 'Registration', 'Heading',
-      'Tagline', 'LogoURL', 'HeroPhotoURL', 'LocationLabel', 'Latitude', 'Longitude', 'MapURL'
+      'Tagline', 'LogoURL', 'HeroPhotoURL', 'IntroductionPhotoURL', 'LocationLabel', 'Latitude', 'Longitude', 'MapURL'
     ].map(k => field(k, ({
       Name: 'मन्दिरको आधिकारिक नाम',
       Address: 'ठेगाना',
@@ -2670,6 +2670,7 @@ function publicSettingsDialog() {
       Tagline: 'छोटो परिचय / स्लोगन',
       LogoURL: 'लोगोको HTTPS URL',
       HeroPhotoURL: 'मुख्य मन्दिर फोटो URL',
+      IntroductionPhotoURL: 'परिचयको छेउमा देखिने फोटो URL',
       LocationLabel: 'स्थानको विवरण',
       Latitude: 'Latitude',
       Longitude: 'Longitude',
@@ -2687,6 +2688,9 @@ function publicSettingsDialog() {
     field('MarqueeColor', 'Marquee Text Colour', 'color', s.MarqueeColor || '#672532') +
     field('MarqueeSpeed', 'Marquee गति (सेकेन्ड; कम = छिटो)', 'number', s.MarqueeSpeed || '35') +
     publicImageField() +
+    '<div class="field full"><label>परिचयको छेउमा देखिने फोटो अपलोड</label>' +
+    '<input id="introductionPhotoFile" type="file" accept="image/jpeg,image/png,image/webp">' +
+    '<small class="muted">यो फोटो परिचयसँग देखिन्छ । फोटो हटाउन माथिको परिचय फोटो URL खाली गर्नुहोस् ।</small></div>' +
     field('MetricsMonth', 'तथ्याङ्कको महिना / अवधि', 'text', s.MetricsMonth || '', false) + field(
       'MonthlyIncome', 'मासिक आम्दानी (रु.)', 'number', s.MonthlyIncome || '0') + field('MonthlyExpense',
       'मासिक खर्च (रु.)', 'number', s.MonthlyExpense || '0') + field('TotalBookings', 'कुल बुकिङ', 'number', s
@@ -2699,6 +2703,10 @@ function publicSettingsDialog() {
   modal('सार्वजनिक मुख्य पेज व्यवस्थापन', body, async values => {
     const imageFile = document.getElementById('publicImageFile');
     if (imageFile && imageFile.files.length) values.HeroPhotoURL = await uploadPublicImage(imageFile.files[0]);
+    const introductionFile = document.getElementById('introductionPhotoFile');
+    if (introductionFile && introductionFile.files.length) {
+      values.IntroductionPhotoURL = await uploadPublicImage(introductionFile.files[0]);
+    }
     normalizeEditorFonts();
     values.IntroductionHTML = $('richEditor').innerHTML;
     return run('public.admin.save', {
