@@ -2618,12 +2618,34 @@ async function renderPublicAdmin() {
   }
 }
 
+
 function publicAdminPanel(tableName, title, columns) {
-  return '<div class="panel" style="margin-bottom:20px"><div class="panel-head"><h2>' + title +
-    '</h2><button class="btn secondary" onclick="publicEntityDialog(\'' + tableName +
-    '\')">＋ थप्ने</button></div>' + table(columns, publicAdminData[tableName], row =>
-      '<button class="btn compact secondary" onclick="publicEntityDialog(\'' + tableName + '\',\'' + row.ID +
-      '\')">सम्पादन</button>') + '</div>';
+  const actions = row => {
+    const edit = `<button class="btn compact secondary"
+      data-table="${esc(tableName)}" data-id="${esc(row.ID)}"
+      onclick="publicEntityDialog(this.dataset.table, this.dataset.id)">सम्पादन</button>`;
+    const remove = tableName === 'PublicNotices' ?
+      `<button class="btn compact danger" data-id="${esc(row.ID)}"
+        onclick="deletePublicNotice(this.dataset.id)">Delete</button>` : '';
+    return edit + ' ' + remove;
+  };
+  return `<div class="panel" style="margin-bottom:20px">
+    <div class="panel-head"><h2>${title}</h2>
+      <button class="btn secondary" data-table="${esc(tableName)}"
+        onclick="publicEntityDialog(this.dataset.table)">＋ थप्ने</button>
+    </div>${table(columns, publicAdminData[tableName], actions)}</div>`;
+}
+
+async function deletePublicNotice(id) {
+  if (state.busy) return;
+  const notice = publicAdminData.PublicNotices.find(record => record.ID === id);
+  if (!notice) return toast('सूचना भेटिएन । Refresh गर्नुहोस् ।', true);
+  const confirmed = window.confirm(
+    'यो सूचना स्थायी रूपमा हटाउने हो?\n\n' + notice.Title +
+    '\n\nMarquee / News बाट पनि हट्छ । विवरण Audit Log मा रहनेछ ।'
+  );
+  if (!confirmed) return;
+  await run('public.notice.delete', {ID: id, Confirmed: true});
 }
 
 function publicToggle(key, label, value) {
