@@ -1042,6 +1042,17 @@ main section[id] {
   scroll-margin-top: calc(var(--public-header-height, 160px) + 16px);
 }
 
+
+/* A Sheet-backed photograph beside the introduction, stacked naturally on mobile. */
+.introduction-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 24px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+}
+
 </style>
  </head>
  <body>
@@ -1148,6 +1159,8 @@ main section[id] {
       </h3>
       <p class="muted small" id="introAddress">
       </p>
+      <img id="introductionPhoto" class="introduction-photo hidden" alt="मन्दिर परिचय फोटो"
+        loading="lazy" decoding="async">
      </div>
      <div class="rich-content skeleton" id="introductionText">
      </div>
@@ -1451,6 +1464,8 @@ function applyContent(p) {
   image('heroPhoto', s.HeroPhotoURL || p.Photos[0]?.ImageURL);
   $('heroPhoto').fetchPriority = 'high';
   if (!$('heroPhoto').classList.contains('hidden')) $('photoPlaceholder').classList.add('hidden');
+  image('introductionPhoto', s.IntroductionPhotoURL);
+  $('introductionPhoto').classList.toggle('hidden', !safeURL(s.IntroductionPhotoURL));
   $('introductionText').classList.remove('skeleton');
   $('introductionText').innerHTML = s.IntroductionHTML || '<p class="muted">परिचय विवरण थपिन बाँकी छ ।</p>';
   const status = p.Status === 'Open' ? 'मन्दिर अहिले खुला छ ।' : p.Status === 'Closed' ?
