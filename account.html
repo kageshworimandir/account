@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ne">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+  <base target="_top"/>
+  <title>
+   मन्दिर • लेखा व्यवस्थापन
+  </title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="assets/css/account.css?v=1.2.0" rel="stylesheet"/>
+ </head>
+ <body>
+  <section class="login-page" id="loginPage">
+   <div class="login-art">
+    <div class="brand-logo">
+     ॐ
+    </div>
+    <div class="eyebrow" style="color:#d8aa5a">
+     TEMPLE MANAGEMENT
+    </div>
+    <h1>
+     आस्थाको सेवा ।
+     <br/>
+     हिसाबमा पारदर्शिता ।
+    </h1>
+    <p>
+     मन्दिरको लेखा, दान, पूजा बुकिङ र सम्पत्ति व्यवस्थापन — एकै ठाउँमा ।
+    </p>
+    <div class="login-features">
+     <span>
+      Double-entry लेखा
+     </span>
+     <span>
+      सुरक्षित स्वीकृति
+     </span>
+     <span>
+      स्पष्ट प्रतिवेदन
+     </span>
+    </div>
+   </div>
+   <div class="login-form-area">
+    <form class="login-box" id="loginForm">
+     <div class="eyebrow">
+      लेखा तथा व्यवस्थापन प्रणाली
+     </div>
+     <h2>
+      स्वागत छ
+     </h2>
+     <p class="muted">
+      आफ्नो खाताबाट प्रवेश गर्नुहोस् ।
+     </p>
+     <div class="field">
+      <label for="username">
+       Username
+      </label>
+      <input autocomplete="username" id="username" required=""/>
+     </div>
+     <div class="field">
+      <label for="password">
+       Password
+      </label>
+      <input autocomplete="current-password" id="password" required="" type="password"/>
+     </div>
+     <button class="btn" type="submit">
+      प्रवेश गर्नुहोस् →
+     </button>
+     <div class="login-error" id="loginError" role="alert">
+     </div>
+     <p class="small muted" style="margin-top:28px">
+      मन्दिर व्यवस्थापन समिति
+     </p>
+    </form>
+   </div>
+  </section>
+  <div class="hidden" id="app">
+   <div class="backdrop" id="backdrop" onclick="toggleMenu(false)">
+   </div>
+   <aside class="sidebar" id="sidebar">
+    <div class="brand">
+     <div class="brand-logo" id="brandLogo">
+      ॐ
+     </div>
+     <div>
+      <strong>
+       मन्दिर
+      </strong>
+      <small>
+       ACCOUNTS &amp; MANAGEMENT
+      </small>
+     </div>
+    </div>
+    <nav id="navigation">
+    </nav>
+    <div class="sidebar-foot">
+     पारदर्शी लेखा • व्यवस्थित सेवा
+     <br/>
+     Version 1.0.0
+    </div>
+   </aside>
+   <div class="workspace">
+    <header class="topbar">
+     <button aria-label="मेनु खोल्नुहोस्" class="icon-button" id="menuButton" onclick="toggleMenu()">
+      ☰
+     </button>
+     <div class="top-title" id="topTitle">
+     </div>
+     <div class="top-tools">
+      <button aria-label="रिफ्रेस" class="icon-button" onclick="refresh()" title="Refresh">
+       ↻
+      </button>
+      <div class="avatar">
+       क
+      </div>
+      <div class="profile" id="profile">
+      </div>
+      <button aria-label="लगआउट" class="icon-button" onclick="logout()" title="Logout">
+       ⏻
+      </button>
+     </div>
+    </header>
+    <main id="main">
+    </main>
+   </div>
+   <nav class="mobile-bottom" id="mobileBottom">
+   </nav>
+  </div>
+  <dialog id="modal">
+   <div class="dialog-head">
+    <h2 id="modalTitle">
+    </h2>
+    <button aria-label="बन्द गर्नुहोस्" class="icon-button" onclick="closeModal()">
+     ×
+    </button>
+   </div>
+   <form id="modalForm">
+    <div class="dialog-body" id="modalBody">
+    </div>
+    <div class="dialog-foot">
+     <button class="btn secondary" onclick="closeModal()" type="button">
+      रद्द
+     </button>
+     <button class="btn" id="saveButton" type="submit">
+      सुरक्षित गर्नुहोस्
+     </button>
+    </div>
+   </form>
+  </dialog>
+  <div aria-label="प्रक्रिया भइरहेको छ" class="loading hidden" id="loader">
+   <div class="spinner">
+   </div>
+  </div>
+  <div class="toast hidden" id="toast" role="status">
+  </div>
+  <div class="hidden" id="printRoot">
+  </div>
+  <script src="config.js?v=1.2.0">
+  </script>
+  <script src="assets/js/api.js?v=1.2.0">
+  </script>
+  <script src="assets/js/account.js?v=1.2.0">
+  </script>
+ </body>
+</html>
