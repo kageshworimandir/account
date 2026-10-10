@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ne">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#4f1a25">
+  <title>कागेश्वरी मन्दिर • लेखा तथा व्यवस्थापन</title>
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f5f4f1;
+      color: #282c35;
+    }
+    iframe {
+      border: 0;
+      display: block;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+    }
+    .setup {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      max-width: 580px;
+      background: white;
+      padding: 35px;
+      border-radius: 22px;
+      border-top: 5px solid #762b39;
+      box-shadow: 0 15px 50px #4f1a2510;
+      line-height: 1.8;
+    }
+    img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+    }
+    h1 {
+      font-size: 24px;
+      line-height: 1.5;
+      color: #762b39;
+    }
+    code {
+      background: #f5f4f1;
+      padding: 3px 7px;
+      border-radius: 5px;
+    }
+    a {
+      color: #762b39;
+    }
+    #fallback {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      padding: 9px 13px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px #0002;
+      font-size: 12px;
+      display: none;
+    }
+  
+  </style>
+</head>
+<body>
+  <section id="setup" class="setup">
+    <div class="card">
+      <img src="Kageshwori%20Mandir%20Logo.jpg" alt="मन्दिर लोगो" onerror="this.hidden=true">
+      <h1>कागेश्वरी मन्दिर<br>लेखा तथा व्यवस्थापन प्रणाली</h1>
+      <p>वेबसाइट तयार छ । Apps Script जडान गर्न बाँकी छ ।</p>
+      <ol>
+        <li>Apps Script मा <code>Code.gs</code> र <code>App.html</code> राख्नुहोस् ।</li>
+        <li>निर्देशनअनुसार Sheet जडान र <code>setupSystem</code> चलाउनुहोस् ।</li>
+        <li>Web App deploy गरेर /exec लिंक कपी गर्नुहोस् ।</li>
+        <li><code>config.js</code> मा <code>appsScriptURL</code> राख्नुहोस् ।</li>
+      </ol>
+      <p>फोन: 9843787311<br>इमेल: kageshworimandir@gmail.com</p>
+    </div>
+  </section>
+  <a id="fallback" target="_blank" rel="noopener">छुट्टै पेजमा खोल्ने ↗</a>
+  <script src="config.js"></script>
+  <script>
+const config = window.MANDIR_CONFIG || {};
+const url = config.appsScriptURL || '';
+if (/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/.test(url)) {
+  document.getElementById('setup').remove();
+  const frame = document.createElement('iframe');
+  frame.src = url;
+  frame.title = 'कागेश्वरी मन्दिर लेखा तथा व्यवस्थापन';
+  frame.allow = 'fullscreen';
+  document.body.prepend(frame);
+  const fallback = document.getElementById('fallback');
+  fallback.href = url;
+  setTimeout(() => {
+    fallback.style.display = 'block';
+  }, 18000);
+}
+  </script>
+</body>
+</html>
