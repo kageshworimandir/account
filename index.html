@@ -3,114 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#4f1a25">
-  <title>कागेश्वरी मन्दिर • लेखा तथा व्यवस्थापन</title>
+  <title>मन्दिर</title>
   <style>
-
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: #f5f4f1;
-      color: #282c35;
-    }
-    iframe {
-      border: 0;
-      display: block;
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-    }
-    .setup {
-      min-height: 100dvh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-    .card {
-      max-width: 580px;
-      background: white;
-      padding: 35px;
-      border-radius: 22px;
-      border-top: 5px solid #762b39;
-      box-shadow: 0 15px 50px #4f1a2510;
-      line-height: 1.8;
-    }
-    img {
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-    }
-    h1 {
-      font-size: 24px;
-      line-height: 1.5;
-      color: #762b39;
-    }
-    code {
-      background: #f5f4f1;
-      padding: 3px 7px;
-      border-radius: 5px;
-    }
-    a {
-      color: #762b39;
-    }
-  
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; background: #faf7f1; }
+    iframe { display: block; width: 100%; height: 100%; border: 0; }
+    #loading { position: fixed; inset: 0; display: grid; place-content: center; gap: 16px; text-align: center; font: 16px system-ui,sans-serif; color: #762b39; padding: 24px; }
+    .spinner { width: 32px; height: 32px; margin: auto; border: 3px solid #e5d8ca; border-top-color: #762b39; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
   </style>
 </head>
 <body>
-  <section id="setup" class="setup">
-    <div class="card">
-      <img src="Kageshwori%20Mandir%20Logo.jpg" alt="मन्दिर लोगो" onerror="this.hidden=true">
-      <h1>कागेश्वरी मन्दिर<br>लेखा तथा व्यवस्थापन प्रणाली</h1>
-      <p>वेबसाइट तयार छ । Apps Script जडान गर्न बाँकी छ ।</p>
-      <ol>
-        <li>Apps Script मा <code>Code.gs</code> र <code>App.html</code> राख्नुहोस् ।</li>
-        <li>निर्देशनअनुसार Sheet जडान र <code>setupSystem</code> चलाउनुहोस् ।</li>
-        <li>Web App deploy गरेर /exec लिंक कपी गर्नुहोस् ।</li>
-        <li><code>config.js</code> मा <code>appsScriptURL</code> राख्नुहोस् ।</li>
-      </ol>
-      <p>फोन: 9843787311<br>इमेल: kageshworimandir@gmail.com</p>
-    </div>
-  </section>
+  <div id="loading" role="status"><div class="spinner"></div><span id="message">वेबसाइट लोड हुँदैछ…</span></div>
+  <iframe id="website" title="मन्दिर वेबसाइट" hidden allow="clipboard-write"></iframe>
   <script>
-    // Load current configuration; fall back to the last confirmed deployment.
-    const confirmedURL = 'https://script.google.com/macros/s/AKfycbw0Cf63DrjUGtS7yDJLrOFCmNrjNp8S_MwsmwNNVnVirxGXkhlJ2umO--DEzZu4wu9WTw/exec';
-
-    function openApplication(candidate) {
-      const url = String(candidate || '').trim();
-      let parsed;
-      try {
-        parsed = new URL(url);
-      } catch (_) {
-        return false;
+    // Keep the deployment URL in the existing config.js, never temple content here.
+    const configScript = document.createElement('script');
+    configScript.src = './config.js?v=' + Date.now();
+    configScript.onload = function () {
+      const config = window.MANDIR_CONFIG || window.APP_CONFIG || {};
+      const url = config.appsScriptURL || config.appsScriptUrl || config.APP_SCRIPT_URL || config.webAppUrl || config.scriptUrl;
+      if (!url || !/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/.test(url)) {
+        document.getElementById('message').textContent = 'config.js मा Apps Script को /exec URL राख्नुहोस् ।';
+        return;
       }
-      if (parsed.protocol !== 'https:' || parsed.hostname !== 'script.google.com' ||
-          !/^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(parsed.pathname)) {
-        return false;
-      }
-      document.getElementById('setup').remove();
-      const frame = document.createElement('iframe');
-      frame.src = parsed.href;
-      frame.title = 'कागेश्वरी मन्दिर लेखा तथा व्यवस्थापन';
-      frame.allow = 'fullscreen';
-      document.body.prepend(frame);
-      return true;
-    }
-
-    function startApplication() {
-      const configured = window.MANDIR_CONFIG && window.MANDIR_CONFIG.appsScriptURL;
-      if (!openApplication(configured)) {
-        openApplication(confirmedURL);
-      }
-    }
-
-    const configuration = document.createElement('script');
-    configuration.src = './config.js?v=' + Date.now();
-    configuration.onload = startApplication;
-    configuration.onerror = startApplication;
-    document.head.appendChild(configuration);
+      const frame = document.getElementById('website');
+      frame.onload = function () { document.getElementById('loading').remove(); };
+      frame.hidden = false;
+      frame.src = url.split('?')[0];
+    };
+    configScript.onerror = function () {
+      document.getElementById('message').textContent = 'config.js भेटिएन । GitHub मा config.js पनि राख्नुहोस् ।';
+    };
+    document.head.appendChild(configScript);
   </script>
 </body>
 </html>
