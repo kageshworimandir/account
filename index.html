@@ -1026,6 +1026,22 @@ textarea {
   }
 }
 
+
+/* Keep the header and Important ticker together while the page scrolls. */
+.public-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--cream, #faf7f1);
+}
+.public-sticky-header > header {
+  position: relative;
+  top: auto;
+}
+main section[id] {
+  scroll-margin-top: calc(var(--public-header-height, 160px) + 16px);
+}
+
 </style>
  </head>
  <body>
@@ -1037,6 +1053,7 @@ textarea {
     </span>
    </div>
   </div>
+  <div class="public-sticky-header" id="publicStickyHeader">
   <header>
    <div class="container header-inner">
     <a class="brand" href="#home">
@@ -1081,6 +1098,7 @@ textarea {
    <button aria-label="सूचना रोक्ने" id="pauseButton" onclick="pauseMarquee()">
     Ⅱ
    </button>
+  </div>
   </div>
   <main id="home">
    <section class="hero">
@@ -1443,13 +1461,14 @@ function applyContent(p) {
   const notices = p.Notices.slice().sort((a, b) => String(b.Date).localeCompare(String(a.Date)) || Number(a
     .Sort) - Number(b.Sort));
   const important = notices.filter(n => shown(n.Important));
+  const news = notices.filter(n => !shown(n.Important));
   $('ribbon').classList.toggle('hidden', !shown(s.MarqueeEnabled) || !important.length);
   txt('marquee', important.map(n => n.Title).join('     ◆     '));
   $('marquee').style.fontSize = Math.max(12, Math.min(40, Number(s.MarqueeSize) || 16)) + 'px';
   $('marquee').style.color = /^#[0-9a-f]{6}$/i.test(s.MarqueeColor || '') ? s.MarqueeColor : '#672532';
   $('marquee').style.animationDuration = Math.max(8, Math.min(120, Number(s.MarqueeSpeed) || 35)) + 's';
-  txt('noticeCount', notices.length ? notices.length + ' सूचना' : '');
-  $('noticeCards').innerHTML = notices.length ? notices.map(n => '<article class="notice-card">' + (safeURL(n
+  txt('noticeCount', news.length ? news.length + ' सूचना' : '');
+  $('noticeCards').innerHTML = news.length ? news.map(n => '<article class="notice-card">' + (safeURL(n
         .ImageURL) ? '<img src="' + esc(n.ImageURL) + '" loading="lazy" decoding="async" alt="' + esc(n
         .Title) + '" onerror="this.hidden=true">' : '') +
       '<div class="notice-card-body"><div class="notice-date">' + esc(n.Date) + (shown(n.Important) ?
@@ -1595,5 +1614,21 @@ async function load() {
 load();
 
 </script>
- </body>
+ <script>
+
+// Measure the combined header for correct anchor spacing on phones and desktop.
+const publicHeader = document.getElementById('publicStickyHeader');
+function updatePublicHeaderHeight() {
+  document.documentElement.style.setProperty(
+    '--public-header-height', publicHeader.getBoundingClientRect().height + 'px'
+  );
+}
+if (window.ResizeObserver) {
+  new ResizeObserver(updatePublicHeaderHeight).observe(publicHeader);
+}
+window.addEventListener('resize', updatePublicHeaderHeight);
+updatePublicHeaderHeight();
+
+</script>
+</body>
 </html>
