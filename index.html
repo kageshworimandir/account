@@ -208,6 +208,9 @@ nav a:hover {
   flex: 1;
 }
 
+.notice-richtext { line-height: 1.75; overflow-wrap: anywhere; }
+.notice-richtext p { margin: 0 0 10px; }
+.notice-richtext table { max-width: 100%; display: block; overflow-x: auto; }
 .marquee-track {
   white-space: nowrap;
   display: inline-block;
@@ -1428,6 +1431,7 @@ function applyContent(p) {
   txt('footerRegistration', s.Registration ? 'दर्ता नं. ' + s.Registration : '');
   image('logo', s.LogoURL);
   image('heroPhoto', s.HeroPhotoURL || p.Photos[0]?.ImageURL);
+  $('heroPhoto').fetchPriority = 'high';
   if (!$('heroPhoto').classList.contains('hidden')) $('photoPlaceholder').classList.add('hidden');
   $('introductionText').classList.remove('skeleton');
   $('introductionText').innerHTML = s.IntroductionHTML || '<p class="muted">परिचय विवरण थपिन बाँकी छ ।</p>';
@@ -1441,13 +1445,16 @@ function applyContent(p) {
   const important = notices.filter(n => shown(n.Important));
   $('ribbon').classList.toggle('hidden', !shown(s.MarqueeEnabled) || !important.length);
   txt('marquee', important.map(n => n.Title).join('     ◆     '));
+  $('marquee').style.fontSize = Math.max(12, Math.min(40, Number(s.MarqueeSize) || 16)) + 'px';
+  $('marquee').style.color = /^#[0-9a-f]{6}$/i.test(s.MarqueeColor || '') ? s.MarqueeColor : '#672532';
+  $('marquee').style.animationDuration = Math.max(8, Math.min(120, Number(s.MarqueeSpeed) || 35)) + 's';
   txt('noticeCount', notices.length ? notices.length + ' सूचना' : '');
   $('noticeCards').innerHTML = notices.length ? notices.map(n => '<article class="notice-card">' + (safeURL(n
         .ImageURL) ? '<img src="' + esc(n.ImageURL) + '" loading="lazy" decoding="async" alt="' + esc(n
         .Title) + '" onerror="this.hidden=true">' : '') +
       '<div class="notice-card-body"><div class="notice-date">' + esc(n.Date) + (shown(n.Important) ?
         ' <span class="notice-tag">महत्त्वपूर्ण</span>' : '') + '</div><h3>' + esc(cleanText(n.Title)) +
-      '</h3><p>' + esc(cleanText(n.Description)) + '</p></div></article>').join('') :
+      '</h3><div class="notice-richtext">' + (n.Description || '') + '</div></div></article>').join('') :
     '<p class="muted">हाल कुनै सूचना प्रकाशित गरिएको छैन ।</p>';
   $('bookHero').classList.toggle('hidden', !shown(s.BookingEnabled));
   $('serviceCards').innerHTML = p.Services.length ? p.Services.map((service, i) =>
@@ -1577,7 +1584,8 @@ async function load() {
     applyContent(p);
     request('visit').then(v => {
       p.Views = v.Views;
-      applyContent(p);
+      const viewNode = document.getElementById('viewCount');
+      if (viewNode && p.Settings.ShowViews === 'true') viewNode.textContent = String(v.Views);
     }).catch(() => {});
   } catch (e) {
     txt('heading', 'विवरण लोड हुन सकेन ।');
