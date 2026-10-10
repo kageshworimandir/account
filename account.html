@@ -2642,8 +2642,12 @@ function publicSettingsDialog() {
       .TempleStatus || 'Auto') +
     field('StatusNote', 'समयसम्बन्धी थप सूचना', 'text', s.StatusNote || '', false) +
     publicToggle('BookingEnabled', 'सार्वजनिक बुकिङ', s.BookingEnabled) + publicToggle('SuggestionsEnabled',
-      'सुझाव फारम', s.SuggestionsEnabled) + publicToggle('MarqueeEnabled', 'महत्त्वपूर्ण सूचना Marquee', s
+      'सुझाव फारम', s.SuggestionsEnabled) +     publicToggle('MarqueeEnabled', 'महत्त्वपूर्ण सूचना Marquee', s
       .MarqueeEnabled) +
+    field('MarqueeSize', 'Marquee अक्षर आकार (12–40 px)', 'number', s.MarqueeSize || '16') +
+    field('MarqueeColor', 'Marquee Text Colour', 'color', s.MarqueeColor || '#672532') +
+    field('MarqueeSpeed', 'Marquee गति (सेकेन्ड; कम = छिटो)', 'number', s.MarqueeSpeed || '35') +
+    publicImageField() +
     field('MetricsMonth', 'तथ्याङ्कको महिना / अवधि', 'text', s.MetricsMonth || '', false) + field(
       'MonthlyIncome', 'मासिक आम्दानी (रु.)', 'number', s.MonthlyIncome || '0') + field('MonthlyExpense',
       'मासिक खर्च (रु.)', 'number', s.MonthlyExpense || '0') + field('TotalBookings', 'कुल बुकिङ', 'number', s
@@ -2653,7 +2657,9 @@ function publicSettingsDialog() {
       .ShowBookings) + publicToggle('ShowViews', 'Public Views देखाउने?', s.ShowViews) +
     '</div><div class="form-note">सार्वजनिक मासिक तथ्याङ्क Admin ले प्रविष्ट गरेको संख्या हो । यसले Accounting Ledger परिवर्तन गर्दैन । लुकाएको वित्तीय तथ्याङ्क public API मा पनि पठाइँदैन ।</div>' +
     richEditorMarkup(s.IntroductionHTML || '');
-  modal('सार्वजनिक मुख्य पेज व्यवस्थापन', body, values => {
+  modal('सार्वजनिक मुख्य पेज व्यवस्थापन', body, async values => {
+    const imageFile = document.getElementById('publicImageFile');
+    if (imageFile && imageFile.files.length) values.HeroPhotoURL = await uploadPublicImage(imageFile.files[0]);
     normalizeEditorFonts();
     values.IntroductionHTML = $('richEditor').innerHTML;
     return run('public.admin.save', {
@@ -2745,6 +2751,34 @@ function normalizeEditorFonts() {
   });
 }
 
+async function uploadPublicImage(file) {
+  if (!file) return '';
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('JPG, PNG वा WebP फोटो छान्नुहोस् ।');
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.76));
+  if (!blob || blob.size > 1500000) throw new Error('फोटो धेरै ठूलो भयो ।');
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+  const saved = await rpc('public.photo.upload', { Name: file.name.replace(/\.[^.]+$/, '') + '.jpg', MimeType: 'image/jpeg', Base64: base64 });
+  return saved.URL;
+}
+
+function publicImageField() {
+  return '<div class="field full"><label>फोटो सीधै अपलोड (JPG / PNG / WebP)</label>' +
+    '<input id="publicImageFile" type="file" accept="image/jpeg,image/png,image/webp">' +
+    '<small class="muted">फोटो Google Drive मा सुरक्षित हुन्छ । पुरानो URL राख्न पनि मिल्छ ।</small></div>';
+}
+
 function publicEntityDialog(tableName, id) {
   const row = publicAdminData[tableName].find(r => r.ID === id) || {};
   let body = '';
@@ -2757,11 +2791,10 @@ function publicEntityDialog(tableName, id) {
   } else {
     const nameKey = tableName === 'PublicServices' ? 'Name' : 'Title';
     body = field(nameKey, 'नाम / शीर्षक', 'text', row[nameKey] || '') + (tableName !== 'PublicServices' ?
-        field('ImageURL', 'फोटोको HTTPS URL', 'text', row.ImageURL || '', tableName === 'PublicPhotos') : ''
+        field('ImageURL', 'फोटोको HTTPS URL (वैकल्पिक)', 'text', row.ImageURL || '', false) + publicImageField() : ''
       ) +
       (tableName !== 'PublicPhotos' ?
-        '<div class="field full"><label>विवरण</label><textarea name="Description">' + esc(row.Description ||
-          '') + '</textarea></div>' : '') +
+        (tableName === 'PublicNotices' ? richEditorMarkup(row.Description || '').replace('मन्दिर परिचय — Rich Text Editor', 'सूचना — Rich Text Editor') : '<div class="field full"><label>विवरण</label><textarea name="Description">' + esc(row.Description || '') + '</textarea></div>') : '') +
       (tableName === 'PublicNotices' ? field('Date', 'सूचना मिति (AD)', 'date', row.Date || today()) +
         selectField('Important', 'Marquee मा देखाउने?', [
           ['false', 'होइन'],
@@ -2772,7 +2805,13 @@ function publicEntityDialog(tableName, id) {
         ['false', 'लुकाउने']
       ], String(row.Active === undefined ? true : row.Active));
   }
-  modal('सार्वजनिक विवरण', '<div class="form-grid">' + body + '</div>', values => {
+  modal('सार्वजनिक विवरण', '<div class="form-grid">' + body + '</div>', async values => {
+    const imageFile = document.getElementById('publicImageFile');
+    if (imageFile && imageFile.files.length) values.ImageURL = await uploadPublicImage(imageFile.files[0]);
+    if (tableName === 'PublicNotices') {
+      normalizeEditorFonts();
+      values.Description = document.getElementById('richEditor').innerHTML;
+    }
     ['Active', 'Important', 'Closed'].forEach(k => {
       if (values[k] !== undefined) values[k] = values[k] === 'true';
     });
@@ -2784,6 +2823,11 @@ function publicEntityDialog(tableName, id) {
       }
     });
   });
+  if (tableName === 'PublicNotices') {
+    editorSelection = null;
+    document.getElementById('richEditor').addEventListener('keyup', rememberEditorSelection);
+    document.getElementById('richEditor').addEventListener('mouseup', rememberEditorSelection);
+  }
 }
 
 function publicReview(tableName, id) {
