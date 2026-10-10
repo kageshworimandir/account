@@ -86,23 +86,46 @@
     </div>
   </section>
   <a id="fallback" target="_blank" rel="noopener">छुट्टै पेजमा खोल्ने ↗</a>
-  <script src="config.js"></script>
   <script>
-const config = window.MANDIR_CONFIG || {};
-const url = config.appsScriptURL || '';
-if (/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/.test(url)) {
-  document.getElementById('setup').remove();
-  const frame = document.createElement('iframe');
-  frame.src = url;
-  frame.title = 'कागेश्वरी मन्दिर लेखा तथा व्यवस्थापन';
-  frame.allow = 'fullscreen';
-  document.body.prepend(frame);
-  const fallback = document.getElementById('fallback');
-  fallback.href = url;
-  setTimeout(() => {
-    fallback.style.display = 'block';
-  }, 18000);
-}
+    // Load current configuration; fall back to the last confirmed deployment.
+    const confirmedURL = 'https://script.google.com/macros/s/AKfycbw0Cf63DrjUGtS7yDJLrOFCmNrjNp8S_MwsmwNNVnVirxGXkhlJ2umO--DEzZu4wu9WTw/exec';
+
+    function openApplication(candidate) {
+      const url = String(candidate || '').trim();
+      let parsed;
+      try {
+        parsed = new URL(url);
+      } catch (_) {
+        return false;
+      }
+      if (parsed.protocol !== 'https:' || parsed.hostname !== 'script.google.com' ||
+          !/^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(parsed.pathname)) {
+        return false;
+      }
+      document.getElementById('setup').remove();
+      const frame = document.createElement('iframe');
+      frame.src = parsed.href;
+      frame.title = 'कागेश्वरी मन्दिर लेखा तथा व्यवस्थापन';
+      frame.allow = 'fullscreen';
+      document.body.prepend(frame);
+      const fallback = document.getElementById('fallback');
+      fallback.href = parsed.href;
+      fallback.style.display = 'block';
+      return true;
+    }
+
+    function startApplication() {
+      const configured = window.MANDIR_CONFIG && window.MANDIR_CONFIG.appsScriptURL;
+      if (!openApplication(configured)) {
+        openApplication(confirmedURL);
+      }
+    }
+
+    const configuration = document.createElement('script');
+    configuration.src = './config.js?v=' + Date.now();
+    configuration.onload = startApplication;
+    configuration.onerror = startApplication;
+    document.head.appendChild(configuration);
   </script>
 </body>
 </html>
