@@ -56,17 +56,6 @@
     a {
       color: #762b39;
     }
-    #fallback {
-      position: fixed;
-      right: 12px;
-      bottom: 12px;
-      padding: 9px 13px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px #0002;
-      font-size: 12px;
-      display: none;
-    }
   
   </style>
 </head>
@@ -85,7 +74,6 @@
       <p>फोन: 9843787311<br>इमेल: kageshworimandir@gmail.com</p>
     </div>
   </section>
-  <a id="fallback" target="_blank" rel="noopener">छुट्टै पेजमा खोल्ने ↗</a>
   <script>
     // Load current configuration; fall back to the last confirmed deployment.
     const confirmedURL = 'https://script.google.com/macros/s/AKfycbw0Cf63DrjUGtS7yDJLrOFCmNrjNp8S_MwsmwNNVnVirxGXkhlJ2umO--DEzZu4wu9WTw/exec';
@@ -108,9 +96,6 @@
       frame.title = 'कागेश्वरी मन्दिर लेखा तथा व्यवस्थापन';
       frame.allow = 'fullscreen';
       document.body.prepend(frame);
-      const fallback = document.getElementById('fallback');
-      fallback.href = parsed.href;
-      fallback.style.display = 'block';
       return true;
     }
 
